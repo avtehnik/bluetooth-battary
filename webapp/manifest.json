@@ -1,0 +1,7 @@
+{
+  "name": "BattInfo",
+  "short_name": "BattInfo",
+  "lang": "en-US",
+  "start_url": "/",
+  "display": "standalone"
+}

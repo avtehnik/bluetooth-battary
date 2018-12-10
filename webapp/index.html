@@ -1,0 +1,103 @@
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="manifest" href="manifest.json">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="BattInfo">
+    <meta name="apple-mobile-web-app-title" content="BattInfo">
+    <meta name="msapplication-starturl" content="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+<body>
+<button>Get Bluetooth Device's Battery Level</button>
+
+
+<h3>Live Output</h3>
+<div id="output" class="output">
+    <div id="content"></div>
+    <div id="status"></div>
+    <pre id="log"></pre>
+</div>
+<script>
+    var ChromeSamples = {
+        log: function () {
+            var line = Array.prototype.slice.call(arguments).map(function (argument) {
+                return typeof argument === 'string' ? argument : JSON.stringify(argument);
+            }).join(' ');
+
+            document.querySelector('#log').textContent += line + '\n';
+        },
+
+        clearLog: function () {
+            document.querySelector('#log').textContent = '';
+        },
+
+        setStatus: function (status) {
+            document.querySelector('#status').textContent = status;
+        },
+
+        setContent: function (newContent) {
+            var content = document.querySelector('#content');
+            while (content.hasChildNodes()) {
+                content.removeChild(content.lastChild);
+            }
+            content.appendChild(newContent);
+        }
+    };
+</script>
+<script>
+    document.querySelector('button').addEventListener('click', function() {
+        if (isWebBluetoothEnabled()) {
+            ChromeSamples.clearLog();
+            onButtonClick();
+        }
+    });
+</script>
+
+<script>function onButtonClick() {
+    log('Requesting Bluetooth Device...');
+    navigator.bluetooth.requestDevice(
+        {filters: [{services: ['battery_service']}]})
+        .then(device => {
+            log('Connecting to GATT Server...');
+            return device.gatt.connect();
+        })
+        .then(server => {
+            log('Getting Battery Service...');
+            return server.getPrimaryService('battery_service');
+        })
+        .then(service => {
+            log('Getting Battery Level Characteristic...');
+            return service.getCharacteristic('battery_level');
+        })
+        .then(characteristic => {
+            log('Reading Battery Level...');
+            return characteristic.readValue();
+        })
+        .then(value => {
+            let batteryLevel = value.getUint8(0);
+            log('> Battery Level is ' + batteryLevel + '%');
+        })
+        .catch(error => {
+            log('Argh! ' + error);
+        });
+}
+</script>
+
+<script>
+    log = ChromeSamples.log;
+
+    function isWebBluetoothEnabled() {
+        if (navigator.bluetooth) {
+            return true;
+        } else {
+            ChromeSamples.setStatus('Web Bluetooth API is not available.\n' +
+                'Please make sure the "Experimental Web Platform features" flag is enabled.');
+            return false;
+        }
+    }
+</script>
+</body>
+</html>
