@@ -104,7 +104,7 @@
 #define APP_BLE_OBSERVER_PRIO           3                                       /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG            1                                       /**< A tag identifying the SoftDevice BLE configuration. */
 
-#define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(10000)                 /**< Battery level measurement interval (ticks). This value corresponds to 120 seconds. */
+#define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(1000)                 /**< Battery level measurement interval (ticks). This value corresponds to 120 seconds. */
 
 #define MIN_CONN_INTERVAL               MSEC_TO_UNITS(500, UNIT_1_25_MS)        /**< Minimum acceptable connection interval (0.5 seconds).  */
 #define MAX_CONN_INTERVAL               MSEC_TO_UNITS(1000, UNIT_1_25_MS)       /**< Maximum acceptable connection interval (1 second). */
@@ -343,7 +343,8 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
         batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) +
                                   DIODE_FWD_VOLT_DROP_MILLIVOLTS;
         percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
-
+        
+NRF_LOG_INFO("BAATTETETERY AHAHAHAH %d",batt_lvl_in_milli_volts - 270);
 //        err_code = ble_bas_battery_level_update(&m_bas, percentage_batt_lvl);
         if (
             (err_code != NRF_SUCCESS)
@@ -380,17 +381,23 @@ static void db_disc_handler(ble_db_discovery_evt_t * p_evt)
 static void adc_configure(void)
 {
 
+    nrf_saadc_channel_config_t channel_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN0);
+
     ret_code_t err_code = nrf_drv_saadc_init(NULL, saadc_event_handler);
     APP_ERROR_CHECK(err_code);
 
     nrf_saadc_channel_config_t config =
         NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_VDD);
-    err_code = nrf_drv_saadc_channel_init(0, &config);
+//    err_code = nrf_drv_saadc_channel_init(0, &config);
+    err_code = nrf_drv_saadc_channel_init(0, &channel_config);
+    
     APP_ERROR_CHECK(err_code);
 
     err_code = nrf_drv_saadc_buffer_convert(&adc_buf[0], 1);
     APP_ERROR_CHECK(err_code);
-
+    
+    NRF_LOG_INFO("TESTESSTES %d,", adc_buf[0]);
     err_code = nrf_drv_saadc_buffer_convert(&adc_buf[1], 1);
     APP_ERROR_CHECK(err_code);
 }
@@ -433,14 +440,29 @@ static void battery_level_meas_timeout_handler(void * p_context)
 //    err_code = ble_bas_battery_level_update(&m_bas, 1);
 //
 //
-//    batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) +  DIODE_FWD_VOLT_DROP_MILLIVOLTS;
+
+//        nrf_saadc_value_t adc_result;
+////        uint16_t          batt_lvl_in_milli_volts;
+////        uint8_t           percentage_batt_lvl;
+////        uint32_t          err_code;
+//
+//        adc_result = p_event->data.done.p_buffer[0];
+//
+//    uint16_t batt_lvl_in_milli_volts = 0;
+//    batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result);
+//    NRF_LOG_INFO("BAATTETETERY AHAHAHAH %d",batt_lvl_in_milli_volts)
+
 //
 //
 //
 //
 //    percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
+    NRF_LOG_INFO("read_voltage ");
 
-     NRF_LOG_INFO("read_voltage ");
+    nrf_drv_saadc_sample();
+//    err_code = nrf_drv_saadc_sample_convert(0, &adc_buf[0]);
+//    APP_ERROR_CHECK(err_code);
+    
 
 //    update_battery_level();
 
@@ -536,7 +558,7 @@ void read_current(){
     valueDec = (uint16_t)((uint16_t)(value[0] << 8) | (uint16_t)value[1]);
     ina219_current = valueDec / ina219_currentDivider_mA;
 
-    NRF_LOG_INFO("read_currents %d ", valueDec );
+//    NRF_LOG_INFO("read_currents %d ", valueDec );
 }
 
 
@@ -1399,7 +1421,7 @@ int main(void)
       err_code = ble_bmi160_measurement_send(&m_bmi160, ina219_voltage, ina219_current);
 
 
-       NRF_LOG_INFO("Proximity example started.  %d ,  %d ", ina219_voltage,  ina219_current );
+//       NRF_LOG_INFO("Proximity example started.  %d ,  %d ", ina219_voltage,  ina219_current );
 
 
         NRF_LOG_FLUSH();
