@@ -5,8 +5,8 @@ GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x18000, LENGTH = 0x18000
-  RAM (rwx) :  ORIGIN = 0x20001270, LENGTH = 0x4d90
+  FLASH (rx) : ORIGIN = 0x23000, LENGTH = 0x5d000
+  RAM (rwx) :  ORIGIN = 0x200020e0, LENGTH = 0xdf20
   
 }
 
@@ -26,17 +26,17 @@ SECTIONS
     KEEP(*(SORT(.log_dynamic_data*)))
     PROVIDE(__stop_log_dynamic_data = .);
   } > RAM
-  .cli_sorted_cmd_ptrs :
-  {
-    PROVIDE(__start_cli_sorted_cmd_ptrs = .);
-    KEEP(*(.cli_sorted_cmd_ptrs))
-    PROVIDE(__stop_cli_sorted_cmd_ptrs = .);
-  } > RAM
   .fs_data :
   {
     PROVIDE(__start_fs_data = .);
     KEEP(*(.fs_data))
     PROVIDE(__stop_fs_data = .);
+  } > RAM
+  .cli_sorted_cmd_ptrs :
+  {
+    PROVIDE(__start_cli_sorted_cmd_ptrs = .);
+    KEEP(*(.cli_sorted_cmd_ptrs))
+    PROVIDE(__stop_cli_sorted_cmd_ptrs = .);
   } > RAM
 
 } INSERT AFTER .data;

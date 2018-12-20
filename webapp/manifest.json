@@ -2,6 +2,6 @@
   "name": "BattInfo",
   "short_name": "BattInfo",
   "lang": "en-US",
-  "start_url": "/",
+  "start_url": "https://fb308310.ngrok.io/",
   "display": "standalone"
 }

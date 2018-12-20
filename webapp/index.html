@@ -22,23 +22,23 @@
 </div>
 <script>
     var ChromeSamples = {
-        log: function () {
-            var line = Array.prototype.slice.call(arguments).map(function (argument) {
+        log: function() {
+            var line = Array.prototype.slice.call(arguments).map(function(argument) {
                 return typeof argument === 'string' ? argument : JSON.stringify(argument);
             }).join(' ');
 
             document.querySelector('#log').textContent += line + '\n';
         },
 
-        clearLog: function () {
+        clearLog: function() {
             document.querySelector('#log').textContent = '';
         },
 
-        setStatus: function (status) {
+        setStatus: function(status) {
             document.querySelector('#status').textContent = status;
         },
 
-        setContent: function (newContent) {
+        setContent: function(newContent) {
             var content = document.querySelector('#content');
             while (content.hasChildNodes()) {
                 content.removeChild(content.lastChild);
@@ -58,8 +58,13 @@
 
 <script>function onButtonClick() {
     log('Requesting Bluetooth Device...');
-    navigator.bluetooth.requestDevice(
-        {filters: [{services: ['battery_service']}]})
+
+
+    navigator.bluetooth.requestDevice({
+        filters: [
+            {services: ['battery_service']}
+        ]
+    })
         .then(device => {
             log('Connecting to GATT Server...');
             return device.gatt.connect();

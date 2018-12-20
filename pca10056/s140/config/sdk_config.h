@@ -1095,6 +1095,13 @@
 #define PWM2_ENABLED 0
 #endif
 
+// <q> PWM3_ENABLED  - Enable PWM3 instance
+ 
+
+#ifndef PWM3_ENABLED
+#define PWM3_ENABLED 0
+#endif
+
 // </e>
 
 // <e> QDEC_ENABLED - nrf_drv_qdec - QDEC peripheral driver
@@ -1421,6 +1428,20 @@
 #define SPIS0_ENABLED 0
 #endif
 
+// <q> SPIS1_ENABLED  - Enable SPIS1 instance
+ 
+
+#ifndef SPIS1_ENABLED
+#define SPIS1_ENABLED 0
+#endif
+
+// <q> SPIS2_ENABLED  - Enable SPIS2 instance
+ 
+
+#ifndef SPIS2_ENABLED
+#define SPIS2_ENABLED 0
+#endif
+
 // </e>
 
 // <e> SPI_ENABLED - nrf_drv_spi - SPI/SPIM peripheral driver
@@ -1474,6 +1495,41 @@
 #ifndef SPI0_ENABLED
 #define SPI0_ENABLED 0
 #endif
+// <q> SPI0_USE_EASY_DMA  - Use EasyDMA
+ 
+
+#ifndef SPI0_USE_EASY_DMA
+#define SPI0_USE_EASY_DMA 1
+#endif
+
+// </e>
+
+// <e> SPI1_ENABLED - Enable SPI1 instance
+//==========================================================
+#ifndef SPI1_ENABLED
+#define SPI1_ENABLED 0
+#endif
+// <q> SPI1_USE_EASY_DMA  - Use EasyDMA
+ 
+
+#ifndef SPI1_USE_EASY_DMA
+#define SPI1_USE_EASY_DMA 1
+#endif
+
+// </e>
+
+// <e> SPI2_ENABLED - Enable SPI2 instance
+//==========================================================
+#ifndef SPI2_ENABLED
+#define SPI2_ENABLED 0
+#endif
+// <q> SPI2_USE_EASY_DMA  - Use EasyDMA
+ 
+
+#ifndef SPI2_USE_EASY_DMA
+#define SPI2_USE_EASY_DMA 1
+#endif
+
 // </e>
 
 // </e>
@@ -1711,6 +1767,27 @@
 #ifndef TWI0_ENABLED
 #define TWI0_ENABLED 0
 #endif
+// <q> TWI0_USE_EASY_DMA  - Use EasyDMA (if present)
+ 
+
+#ifndef TWI0_USE_EASY_DMA
+#define TWI0_USE_EASY_DMA 0
+#endif
+
+// </e>
+
+// <e> TWI1_ENABLED - Enable TWI1 instance
+//==========================================================
+#ifndef TWI1_ENABLED
+#define TWI1_ENABLED 0
+#endif
+// <q> TWI1_USE_EASY_DMA  - Use EasyDMA (if present)
+ 
+
+#ifndef TWI1_USE_EASY_DMA
+#define TWI1_USE_EASY_DMA 0
+#endif
+
 // </e>
 
 // </e>
@@ -1802,6 +1879,20 @@
 
 #ifndef UART0_CONFIG_USE_EASY_DMA
 #define UART0_CONFIG_USE_EASY_DMA 1
+#endif
+
+// </e>
+
+// <e> UART1_ENABLED - Enable UART1 instance
+//==========================================================
+#ifndef UART1_ENABLED
+#define UART1_ENABLED 0
+#endif
+// <q> UART1_CONFIG_USE_EASY_DMA  - Default setting for using EasyDMA
+ 
+
+#ifndef UART1_CONFIG_USE_EASY_DMA
+#define UART1_CONFIG_USE_EASY_DMA 1
 #endif
 
 // </e>
@@ -2725,6 +2816,22 @@
 // <29=> 29 (P0.29) 
 // <30=> 30 (P0.30) 
 // <31=> 31 (P0.31) 
+// <32=> 32 (P1.0) 
+// <33=> 33 (P1.1) 
+// <34=> 34 (P1.2) 
+// <35=> 35 (P1.3) 
+// <36=> 36 (P1.4) 
+// <37=> 37 (P1.5) 
+// <38=> 38 (P1.6) 
+// <39=> 39 (P1.7) 
+// <40=> 40 (P1.8) 
+// <41=> 41 (P1.9) 
+// <42=> 42 (P1.10) 
+// <43=> 43 (P1.11) 
+// <44=> 44 (P1.12) 
+// <45=> 45 (P1.13) 
+// <46=> 46 (P1.14) 
+// <47=> 47 (P1.15) 
 // <4294967295=> Not connected 
 
 #ifndef NRF_PWR_MGMT_SLEEP_DEBUG_PIN
