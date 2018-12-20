@@ -1,10 +1,9 @@
 <!DOCTYPE CrossStudio_Session_File>
 <session>
- <Bookmarks/>
+ <Bookmarks>
+  <BookmarkItem objectName="" line="775" column="0" path="/home/anatolii/BLE/nRF5_SDK_14.2.0_17b948a/examples/ble_peripheral/bluetooth-battary/main.c" number="1" extra="" color="5"/>
+ </Bookmarks>
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
-  <BreakpointListItem trigger="" line="175" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="2" filename="../../../ble_bmi160.c" useHWbreakpoint="false"/>
-  <BreakpointListItem trigger="" line="183" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="2" filename="../../../ble_bmi160.c" useHWbreakpoint="false"/>
-  <BreakpointListItem trigger="" line="195" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="2" filename="../../../ble_bmi160.c" useHWbreakpoint="false"/>
   <Exceptions set="MemManage;UsageFault_Coprocessor;UsageFault_CheckingError;UsageFault_StateError;BusFault;ExceptionEntryReturnFault;HardFault"/>
  </Breakpoints>
  <ExecutionProfileWindow/>
@@ -28,6 +27,7 @@
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132"/>
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;Application"/>
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;Device"/>
+  <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;nRF_Drivers"/>
  </Project>
  <Register1>
   <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="ble_app_proximity_pca10040_s132" decimalNodes="" octalNodes="" unsignedNodes=""/>
@@ -57,11 +57,12 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1321" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" debugPath="../../../main.c" selected="1" top="1307" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="46" y="21" useTextEdit="1" useBinaryEdit="0" left="142" path="ble_app_proximity_pca10040_s132.emProject" debugPath="ble_app_proximity_pca10040_s132.emProject" selected="0" top="12" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1316" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" debugPath="../../../main.c" selected="0" top="1302" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="198" y="28" useTextEdit="1" useBinaryEdit="0" left="144" path="ble_app_proximity_pca10040_s132.emProject" debugPath="ble_app_proximity_pca10040_s132.emProject" selected="1" top="12" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="35" y="5299" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" debugPath="../config/sdk_config.h" selected="0" top="5283" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="49" y="174" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../ble_bmi160.c" debugPath="../../../ble_bmi160.c" selected="0" top="159" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="14" y="220" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../ble_bmi160.c" debugPath="../../../ble_bmi160.c" selected="0" top="189" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="55" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../ble_bmi160.h" debugPath="../../../ble_bmi160.h" selected="0" top="42" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="390" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/uart/nrf_drv_uart.c" debugPath="../../../../../../components/drivers_nrf/uart/nrf_drv_uart.c" selected="0" top="378" codecName=""/>
  </Files>
  <ARMCrossStudioWindow activeProject="ble_app_proximity_pca10040_s132" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Debug" debugSearchFileMap="" fileDialogInitialDirectory="/Users/vitaliy/work/nRF52/nRF5_SDK_14.2.0_17b948a/examples/ble_peripheral/ble_app_proximity" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>

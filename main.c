@@ -112,7 +112,7 @@
 #define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(4000, UNIT_10_MS)         /**< Connection supervisory timeout (4 seconds). */
 
 #define APP_ADV_INTERVAL               40                                       /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDS     180                                      /**< The advertising timeout in units of seconds. */
+#define APP_ADV_TIMEOUT_IN_SECONDS     BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED                                      /**< The advertising timeout in units of seconds. */
 
 #define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(5000)                   /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000)                  /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
@@ -663,27 +663,53 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
  */
 static void advertising_init(void)
 {
-    ret_code_t             err_code;
-    ble_advertising_init_t init;
+//    ret_code_t             err_code;
+//    ble_advertising_init_t init;
+//
+//    memset(&init, 0, sizeof(init));
+//
+//    init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
+//    init.advdata.include_appearance      = true;
+//    init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
+//    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+//    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
+//
+//    init.config.ble_adv_fast_enabled  = true;
+//    init.config.ble_adv_fast_interval = APP_ADV_INTERVAL;
+//    init.config.ble_adv_fast_timeout  = APP_ADV_TIMEOUT_IN_SECONDS;
+//
+//    init.evt_handler = on_adv_evt;
+//
+//    err_code = ble_advertising_init(&m_advertising, &init);
+//    APP_ERROR_CHECK(err_code);
+//
+//    ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
 
-    memset(&init, 0, sizeof(init));
+//---------------------------------------------------
+//---------------------------------------------------
+//---------------------------------------------------
+    ret_code_t err_code;
+    ble_advdata_t advdata;
+    ble_advdata_t srdata;
 
-    init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
-    init.advdata.include_appearance      = true;
-    init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
-    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
-    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
+//    ble_uuid_t adv_uuids[] = {
+//        {LBS_UUID_SERVICE, m_lbs.uuid_type},
+//        {BLE_UUID_BATTERY_SERVICE,              BLE_UUID_TYPE_BLE}};
 
-    init.config.ble_adv_fast_enabled  = true;
-    init.config.ble_adv_fast_interval = APP_ADV_INTERVAL;
-    init.config.ble_adv_fast_timeout  = APP_ADV_TIMEOUT_IN_SECONDS;
+    // Build and set advertising data
+    memset(&advdata, 0, sizeof(advdata));
 
-    init.evt_handler = on_adv_evt;
+    advdata.name_type = BLE_ADVDATA_FULL_NAME;
+    advdata.include_appearance = true;
+    advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
-    err_code = ble_advertising_init(&m_advertising, &init);
+    memset(&srdata, 0, sizeof(srdata));
+    srdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+//    srdata.uuids_complete.p_uuids = adv_uuids;
+    srdata.uuids_complete.p_uuids = m_adv_uuids;
+
+    err_code = ble_advdata_set(&advdata, &srdata);
     APP_ERROR_CHECK(err_code);
-
-    ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
 }
 
 
@@ -1026,6 +1052,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected.");
             // LED indication will be changed when advertising starts.
+            advertising_start(false);
             break;
 
         case BLE_GAP_EVT_CONNECTED:
@@ -1295,19 +1322,38 @@ static void delete_bonds(void)
 static void advertising_start(bool erase_bonds)
 {
 
+//    ret_code_t err_code;
+//
+//   err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
+//    if (erase_bonds == true){
+//        delete_bonds();
+//        // Advertising is started by PM_EVT_PEERS_DELETE_SUCEEDED event.
+//    }
+//    else
+//    {
+//        uint32_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
+//
+//        APP_ERROR_CHECK(err_code);
+//    }
+
+//----------------------------------------------------
+//----------------------------------------------------
+//----------------------------------------------------
     ret_code_t err_code;
+    ble_gap_adv_params_t adv_params;
 
-   err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
-    if (erase_bonds == true){
-        delete_bonds();
-        // Advertising is started by PM_EVT_PEERS_DELETE_SUCEEDED event.
-    }
-    else
-    {
-        uint32_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
+    // Start advertising
+    memset(&adv_params, 0, sizeof(adv_params));
 
-        APP_ERROR_CHECK(err_code);
-    }
+    adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+    adv_params.p_peer_addr = NULL;
+    adv_params.fp = BLE_GAP_ADV_FP_ANY;
+    adv_params.interval = APP_ADV_INTERVAL;
+    adv_params.timeout = APP_ADV_TIMEOUT_IN_SECONDS;
+
+    err_code = sd_ble_gap_adv_start(&adv_params, APP_BLE_CONN_CFG_TAG);
+    APP_ERROR_CHECK(err_code);
+
 }
 
 
