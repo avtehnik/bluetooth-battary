@@ -534,10 +534,9 @@ void read_current(){
     err = nrf_drv_twi_rx(&m_twi, INA219_ADDRESS, value, sizeof(value));
     nrf_delay_ms(100);
     valueDec = (uint16_t)((uint16_t)(value[0] << 8) | (uint16_t)value[1]);
-    ina219_current /= ina219_currentDivider_mA;
+    ina219_current = valueDec / ina219_currentDivider_mA;
 
-//        valueDec *= 1000;
-    NRF_LOG_INFO("read_currents %d ", ina219_current );
+    NRF_LOG_INFO("read_currents %d ", valueDec );
 }
 
 
@@ -771,16 +770,12 @@ static void bas_init(void)
     ble_bmi160_init_t bmi160_init;
     memset(&bmi160_init, 0, sizeof(bmi160_init));
 
-    bmi160_init.evt_handler          = NULL;
-    
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bmi160_init.bmi160_attr_md.cccd_write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bmi160_init.bmi160_attr_md.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bmi160_init.bmi160_attr_md.write_perm);
 
     err_code = ble_bmi160_init(&m_bmi160, &bmi160_init);
     APP_ERROR_CHECK(err_code);
-
-
 }
 
 
@@ -810,9 +805,9 @@ static void ias_client_init(void)
  */
 static void services_init(void)
 {
-//    tps_init();
-//    ias_init();
-//    lls_init();
+    tps_init();
+    ias_init();
+    lls_init();
     bas_init();
     ias_client_init();
 
@@ -1355,7 +1350,7 @@ int main(void)
       uint32_t battery_level = (ina219_voltage-11000)/(126-111);
       err_code = ble_bas_battery_level_update(&m_bas, (uint8_t) battery_level);
       
-//      err_code = ble_bmi160_measurement_send(&m_bmi160, ina219_voltage, ina219_current);
+      err_code = ble_bmi160_measurement_send(&m_bmi160, ina219_voltage, ina219_current);
 
 
        NRF_LOG_INFO("Proximity example started.  %d ,  %d ", ina219_voltage,  ina219_current );

@@ -9,7 +9,7 @@
 #define HANDLE_LENGTH 2
 //#define MAX_PACKET_LEN (uint8_t)(20)
 #define PACKET_CUTOFF 4
-uint8_t MAX_PACKET_LEN = 16;
+uint8_t MAX_PACKET_LEN = 4;
 
 
 static __INLINE uint8_t int16_encode(int16_t value, int8_t *p_encoded_data) {
@@ -216,7 +216,11 @@ uint32_t ble_bmi160_measurement_send(ble_bmi160_t *p_bmi160,  uint16_t accel, ui
     hvx_params.offset = 0;
 
     len = bmi_encode(p_bmi160, accel, gyro, encoded_bmi);
-    len = len - PACKET_CUTOFF;
+    
+
+//    len = 4;
+    NRF_LOG_INFO("ahahahaha %d", len);
+    len = len;
     hvx_len = len;
     
 //    NRF_LOG_INFO("ttteest %d",len);
