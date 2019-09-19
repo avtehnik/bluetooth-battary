@@ -104,7 +104,7 @@
 #define APP_BLE_OBSERVER_PRIO           3                                       /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG            1                                       /**< A tag identifying the SoftDevice BLE configuration. */
 
-#define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(10000)                 /**< Battery level measurement interval (ticks). This value corresponds to 120 seconds. */
+#define BATTERY_LEVEL_MEAS_INTERVAL     APP_TIMER_TICKS(1000)                 /**< Battery level measurement interval (ticks). This value corresponds to 120 seconds. */
 
 #define MIN_CONN_INTERVAL               MSEC_TO_UNITS(500, UNIT_1_25_MS)        /**< Minimum acceptable connection interval (0.5 seconds).  */
 #define MAX_CONN_INTERVAL               MSEC_TO_UNITS(1000, UNIT_1_25_MS)       /**< Maximum acceptable connection interval (1 second). */
@@ -112,7 +112,7 @@
 #define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(4000, UNIT_10_MS)         /**< Connection supervisory timeout (4 seconds). */
 
 #define APP_ADV_INTERVAL               40                                       /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDS     180                                      /**< The advertising timeout in units of seconds. */
+#define APP_ADV_TIMEOUT_IN_SECONDS     BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED                                      /**< The advertising timeout in units of seconds. */
 
 #define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(5000)                   /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000)                  /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
@@ -343,7 +343,8 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
         batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) +
                                   DIODE_FWD_VOLT_DROP_MILLIVOLTS;
         percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
-
+        
+NRF_LOG_INFO("BAATTETETERY AHAHAHAH %d",batt_lvl_in_milli_volts - 270);
 //        err_code = ble_bas_battery_level_update(&m_bas, percentage_batt_lvl);
         if (
             (err_code != NRF_SUCCESS)
@@ -380,17 +381,23 @@ static void db_disc_handler(ble_db_discovery_evt_t * p_evt)
 static void adc_configure(void)
 {
 
+    nrf_saadc_channel_config_t channel_config =
+        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN0);
+
     ret_code_t err_code = nrf_drv_saadc_init(NULL, saadc_event_handler);
     APP_ERROR_CHECK(err_code);
 
     nrf_saadc_channel_config_t config =
         NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_VDD);
-    err_code = nrf_drv_saadc_channel_init(0, &config);
+//    err_code = nrf_drv_saadc_channel_init(0, &config);
+    err_code = nrf_drv_saadc_channel_init(0, &channel_config);
+    
     APP_ERROR_CHECK(err_code);
 
     err_code = nrf_drv_saadc_buffer_convert(&adc_buf[0], 1);
     APP_ERROR_CHECK(err_code);
-
+    
+    NRF_LOG_INFO("TESTESSTES %d,", adc_buf[0]);
     err_code = nrf_drv_saadc_buffer_convert(&adc_buf[1], 1);
     APP_ERROR_CHECK(err_code);
 }
@@ -433,14 +440,29 @@ static void battery_level_meas_timeout_handler(void * p_context)
 //    err_code = ble_bas_battery_level_update(&m_bas, 1);
 //
 //
-//    batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) +  DIODE_FWD_VOLT_DROP_MILLIVOLTS;
+
+//        nrf_saadc_value_t adc_result;
+////        uint16_t          batt_lvl_in_milli_volts;
+////        uint8_t           percentage_batt_lvl;
+////        uint32_t          err_code;
+//
+//        adc_result = p_event->data.done.p_buffer[0];
+//
+//    uint16_t batt_lvl_in_milli_volts = 0;
+//    batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result);
+//    NRF_LOG_INFO("BAATTETETERY AHAHAHAH %d",batt_lvl_in_milli_volts)
+
 //
 //
 //
 //
 //    percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
+    NRF_LOG_INFO("read_voltage ");
 
-     NRF_LOG_INFO("read_voltage ");
+    nrf_drv_saadc_sample();
+//    err_code = nrf_drv_saadc_sample_convert(0, &adc_buf[0]);
+//    APP_ERROR_CHECK(err_code);
+    
 
 //    update_battery_level();
 
@@ -534,10 +556,9 @@ void read_current(){
     err = nrf_drv_twi_rx(&m_twi, INA219_ADDRESS, value, sizeof(value));
     nrf_delay_ms(100);
     valueDec = (uint16_t)((uint16_t)(value[0] << 8) | (uint16_t)value[1]);
-    ina219_current /= ina219_currentDivider_mA;
+    ina219_current = valueDec / ina219_currentDivider_mA;
 
-//        valueDec *= 1000;
-    NRF_LOG_INFO("read_currents %d ", ina219_current );
+//    NRF_LOG_INFO("read_currents %d ", valueDec );
 }
 
 
@@ -664,27 +685,53 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
  */
 static void advertising_init(void)
 {
-    ret_code_t             err_code;
-    ble_advertising_init_t init;
+//    ret_code_t             err_code;
+//    ble_advertising_init_t init;
+//
+//    memset(&init, 0, sizeof(init));
+//
+//    init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
+//    init.advdata.include_appearance      = true;
+//    init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
+//    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+//    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
+//
+//    init.config.ble_adv_fast_enabled  = true;
+//    init.config.ble_adv_fast_interval = APP_ADV_INTERVAL;
+//    init.config.ble_adv_fast_timeout  = APP_ADV_TIMEOUT_IN_SECONDS;
+//
+//    init.evt_handler = on_adv_evt;
+//
+//    err_code = ble_advertising_init(&m_advertising, &init);
+//    APP_ERROR_CHECK(err_code);
+//
+//    ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
 
-    memset(&init, 0, sizeof(init));
+//---------------------------------------------------
+//---------------------------------------------------
+//---------------------------------------------------
+    ret_code_t err_code;
+    ble_advdata_t advdata;
+    ble_advdata_t srdata;
 
-    init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
-    init.advdata.include_appearance      = true;
-    init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
-    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
-    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
+//    ble_uuid_t adv_uuids[] = {
+//        {LBS_UUID_SERVICE, m_lbs.uuid_type},
+//        {BLE_UUID_BATTERY_SERVICE,              BLE_UUID_TYPE_BLE}};
 
-    init.config.ble_adv_fast_enabled  = true;
-    init.config.ble_adv_fast_interval = APP_ADV_INTERVAL;
-    init.config.ble_adv_fast_timeout  = APP_ADV_TIMEOUT_IN_SECONDS;
+    // Build and set advertising data
+    memset(&advdata, 0, sizeof(advdata));
 
-    init.evt_handler = on_adv_evt;
+    advdata.name_type = BLE_ADVDATA_FULL_NAME;
+    advdata.include_appearance = true;
+    advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
-    err_code = ble_advertising_init(&m_advertising, &init);
+    memset(&srdata, 0, sizeof(srdata));
+    srdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+//    srdata.uuids_complete.p_uuids = adv_uuids;
+    srdata.uuids_complete.p_uuids = m_adv_uuids;
+
+    err_code = ble_advdata_set(&advdata, &srdata);
     APP_ERROR_CHECK(err_code);
-
-    ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
 }
 
 
@@ -771,16 +818,12 @@ static void bas_init(void)
     ble_bmi160_init_t bmi160_init;
     memset(&bmi160_init, 0, sizeof(bmi160_init));
 
-    bmi160_init.evt_handler          = NULL;
-    
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bmi160_init.bmi160_attr_md.cccd_write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bmi160_init.bmi160_attr_md.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bmi160_init.bmi160_attr_md.write_perm);
 
     err_code = ble_bmi160_init(&m_bmi160, &bmi160_init);
     APP_ERROR_CHECK(err_code);
-
-
 }
 
 
@@ -810,9 +853,9 @@ static void ias_client_init(void)
  */
 static void services_init(void)
 {
-//    tps_init();
-//    ias_init();
-//    lls_init();
+    tps_init();
+    ias_init();
+    lls_init();
     bas_init();
     ias_client_init();
 
@@ -1031,6 +1074,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected.");
             // LED indication will be changed when advertising starts.
+            advertising_start(false);
             break;
 
         case BLE_GAP_EVT_CONNECTED:
@@ -1300,19 +1344,38 @@ static void delete_bonds(void)
 static void advertising_start(bool erase_bonds)
 {
 
+//    ret_code_t err_code;
+//
+//   err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
+//    if (erase_bonds == true){
+//        delete_bonds();
+//        // Advertising is started by PM_EVT_PEERS_DELETE_SUCEEDED event.
+//    }
+//    else
+//    {
+//        uint32_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
+//
+//        APP_ERROR_CHECK(err_code);
+//    }
+
+//----------------------------------------------------
+//----------------------------------------------------
+//----------------------------------------------------
     ret_code_t err_code;
+    ble_gap_adv_params_t adv_params;
 
-   err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
-    if (erase_bonds == true){
-        delete_bonds();
-        // Advertising is started by PM_EVT_PEERS_DELETE_SUCEEDED event.
-    }
-    else
-    {
-        uint32_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
+    // Start advertising
+    memset(&adv_params, 0, sizeof(adv_params));
 
-        APP_ERROR_CHECK(err_code);
-    }
+    adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+    adv_params.p_peer_addr = NULL;
+    adv_params.fp = BLE_GAP_ADV_FP_ANY;
+    adv_params.interval = APP_ADV_INTERVAL;
+    adv_params.timeout = APP_ADV_TIMEOUT_IN_SECONDS;
+
+    err_code = sd_ble_gap_adv_start(&adv_params, APP_BLE_CONN_CFG_TAG);
+    APP_ERROR_CHECK(err_code);
+
 }
 
 
@@ -1355,10 +1418,10 @@ int main(void)
       uint32_t battery_level = (ina219_voltage-11000)/(126-111);
       err_code = ble_bas_battery_level_update(&m_bas, (uint8_t) battery_level);
       
-//      err_code = ble_bmi160_measurement_send(&m_bmi160, ina219_voltage, ina219_current);
+      err_code = ble_bmi160_measurement_send(&m_bmi160, ina219_voltage, ina219_current);
 
 
-       NRF_LOG_INFO("Proximity example started.  %d ,  %d ", ina219_voltage,  ina219_current );
+//       NRF_LOG_INFO("Proximity example started.  %d ,  %d ", ina219_voltage,  ina219_current );
 
 
         NRF_LOG_FLUSH();
