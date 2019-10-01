@@ -93,6 +93,9 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
+//#include "bsp.h"
+#include "nrf_drv_timer.h"
+
 
 /* TWI instance ID. */
 #define TWI_INSTANCE_ID     0
@@ -138,6 +141,13 @@
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 
+#define VERTICAL_DIR_PIN 17
+#define VERTICAL_STEP_PIN 18
+
+#define HORIZONTAL_DIR_PIN 19
+#define HORIZONTAL_STEP_PIN 20
+
+
 /**@brief Macro to convert the result of ADC conversion in millivolts.
  *
  * @param[in]  ADC_VALUE   ADC result.
@@ -157,6 +167,11 @@ BLE_IAS_C_DEF(m_ias_c);                                 /**< Immediate Alert Ser
 NRF_BLE_GATT_DEF(m_gatt);                               /**< GATT module instance. */
 BLE_ADVERTISING_DEF(m_advertising);                     /**< Advertising module instance. */
 BLE_DB_DISCOVERY_DEF(m_ble_db_discovery);               /**< DB discovery module instance. */
+
+const nrf_drv_timer_t TIMER_MOTORS = NRF_DRV_TIMER_INSTANCE(4);
+uint8_t motor_control_cycle_status  = 0;
+volatile int16_t needed_steps_horizontal    = 0;
+volatile int16_t needed_steps_vertical      = 0;
 
 static volatile bool m_is_high_alert_signalled;         /**< Variable to indicate whether a high alert has been signalled to the peer. */
 static volatile bool m_is_ias_present = false;          /**< Variable to indicate whether the immediate alert service has been discovered at the connected peer. */
@@ -183,11 +198,102 @@ static void on_bas_evt(ble_bas_t * p_bas, ble_bas_evt_t * p_evt);
 static void advertising_init(void);
 static void advertising_start(bool erase_bonds);
 
-uint32_t ina219_currentDivider_mA = 10;
-uint16_t ina219_current = 0;
-uint16_t ina219_voltage = 0;
+volatile int32_t ina219_currentDivider_mA = 10;
+volatile int16_t ina219_current = 0;
+volatile int16_t ina219_voltage = 0;
 
+void motor_step_horizontal(void) {
+    uint32_t horizontal_read = nrf_gpio_pin_out_read(HORIZONTAL_STEP_PIN);
 
+    if (horizontal_read != 0) {
+      nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 0);
+    } else {
+      nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 1);
+    }
+}
+
+void motor_set_dir_horizontal(uint8_t direction) {
+    if (direction != 0) {
+      nrf_gpio_pin_write(HORIZONTAL_DIR_PIN, 1);
+    } else {
+      nrf_gpio_pin_write(HORIZONTAL_DIR_PIN, 0);
+    }
+}
+
+void motor_step_vertical(void) {
+    uint32_t vert_read = nrf_gpio_pin_out_read(VERTICAL_STEP_PIN);
+    if (vert_read != 0) {
+      nrf_gpio_pin_write(VERTICAL_STEP_PIN, 0);
+    } else {
+      nrf_gpio_pin_write(VERTICAL_STEP_PIN, 1);
+    }
+}
+
+void motor_set_dir_vertical(uint8_t direction) {
+    if (direction != 0) {
+      nrf_gpio_pin_write(VERTICAL_DIR_PIN, 1);
+    } else {
+      nrf_gpio_pin_write(VERTICAL_DIR_PIN, 0);
+    }
+}
+
+void mottor_stepping_function (void) 
+{
+    if (motor_control_cycle_status == 0) {
+      motor_control_cycle_status = 1;
+      
+      if (needed_steps_horizontal > 0) {
+        needed_steps_horizontal--;
+        motor_set_dir_horizontal(0);
+        motor_set_dir_vertical(0);
+        motor_step_horizontal();
+        motor_step_vertical();
+      } else if (needed_steps_horizontal < 0) {
+        needed_steps_horizontal++;
+        motor_set_dir_horizontal(1);
+        motor_set_dir_vertical(1);
+        motor_step_horizontal();
+        motor_step_vertical();
+      }
+    } else {
+      motor_control_cycle_status = 0;
+      
+      if (needed_steps_vertical > 0) {
+        needed_steps_vertical--;
+        motor_set_dir_vertical(0);
+        motor_step_vertical();
+      } else if (needed_steps_vertical < 0) {
+        needed_steps_vertical++;
+        motor_set_dir_vertical(1);
+        motor_step_vertical();
+      }
+    }
+
+//    NRF_LOG_INFO("000000000000000");
+
+}
+
+/**
+ * @brief Handler for timer events.
+ */
+void timer_led_event_handler(nrf_timer_event_t event_type, void* p_context)
+{
+    static uint32_t i;
+//    uint32_t led_to_invert = ((i++) % LEDS_NUMBER);
+
+    switch (event_type)
+    {
+        case NRF_TIMER_EVENT_COMPARE0:
+            {
+              mottor_stepping_function();
+            }
+            break;
+
+        default:
+            //Do nothing.
+            break;
+    }
+}
 
 
 /**@brief Callback function for asserts in the SoftDevice.
@@ -1388,7 +1494,7 @@ int main(void)
     // Initialize.
     log_init();
     timers_init();
-    buttons_leds_init(&erase_bonds);
+//    buttons_leds_init(&erase_bonds);
     ble_stack_init();
     adc_configure();
     gap_params_init();
@@ -1406,7 +1512,28 @@ int main(void)
     advertising_start(erase_bonds);
             err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
 
+        
+        /* timer initilization for motors control */
+        uint32_t time_us = 50; //Time(in miliseconds) between consecutive compare events.
+        uint32_t time_ticks;
 
+        //Configure TIMER_MOTORS for generating simple light effect - leds on board will invert his state one after the other.
+        nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
+        err_code = nrf_drv_timer_init(&TIMER_MOTORS, &timer_cfg, timer_led_event_handler);
+        APP_ERROR_CHECK(err_code);
+
+        time_ticks = nrf_drv_timer_us_to_ticks(&TIMER_MOTORS, time_us);
+
+        nrf_drv_timer_extended_compare(
+             &TIMER_MOTORS, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+
+        nrf_drv_timer_enable(&TIMER_MOTORS);
+
+
+    nrf_gpio_cfg_output(VERTICAL_STEP_PIN);
+    nrf_gpio_cfg_output(VERTICAL_DIR_PIN);
+    nrf_gpio_cfg_output(HORIZONTAL_STEP_PIN);
+    nrf_gpio_cfg_output(HORIZONTAL_DIR_PIN);
 
     // Enter main loop.
     for (;;)
@@ -1423,13 +1550,17 @@ int main(void)
 
 //       NRF_LOG_INFO("Proximity example started.  %d ,  %d ", ina219_voltage,  ina219_current );
 
+        needed_steps_horizontal = 3000;
+        nrf_delay_ms(2000);
+        needed_steps_vertical = 500;
+        nrf_delay_ms(2000);
 
-        NRF_LOG_FLUSH();
-
-        if (NRF_LOG_PROCESS() == false)
-        {
-            power_manage();
-        }
+      NRF_LOG_FLUSH();
+//
+//        if (NRF_LOG_PROCESS() == false)
+//        {
+//            power_manage();
+//        }
     }
 }
 

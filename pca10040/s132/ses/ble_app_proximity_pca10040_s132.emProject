@@ -77,6 +77,7 @@
       <file file_name="../../../../../../components/drivers_nrf/twi_master/nrf_drv_twi.c" />
       <file file_name="../../../../../../components/drivers_nrf/uart/nrf_drv_uart.c" />
       <file file_name="../../../../../../components/drivers_nrf/hal/nrf_saadc.c" />
+      <file file_name="../../../../../../components/drivers_nrf/timer/nrf_drv_timer.c" />
     </folder>
     <folder Name="Board Support">
       <file file_name="../../../../../../components/libraries/bsp/bsp.c" />

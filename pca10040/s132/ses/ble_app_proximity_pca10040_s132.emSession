@@ -24,8 +24,10 @@
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132"/>
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132"/>
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;Application"/>
+  <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;Board Definition"/>
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;Device"/>
   <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;nRF_Drivers"/>
+  <ProjectSessionItem path="ble_app_proximity_pca10040_s132;ble_app_proximity_pca10040_s132;nRF_Libraries"/>
  </Project>
  <Register1>
   <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="ble_app_proximity_pca10040_s132" decimalNodes="" octalNodes="" unsignedNodes=""/>
@@ -39,6 +41,9 @@
  <Register4>
   <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="ble_app_proximity_pca10040_s132" decimalNodes="" octalNodes="" unsignedNodes=""/>
  </Register4>
+ <Threads>
+  <ThreadsWindow showLists=""/>
+ </Threads>
  <TraceWindow>
   <Trace enabled="Yes"/>
  </TraceWindow>
@@ -55,14 +60,20 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1384" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" debugPath="../../../main.c" selected="0" top="1370" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="28" useTextEdit="1" useBinaryEdit="0" left="0" path="ble_app_proximity_pca10040_s132.emProject" debugPath="ble_app_proximity_pca10040_s132.emProject" selected="0" top="12" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="5299" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" debugPath="../config/sdk_config.h" selected="0" top="5283" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="57" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../ble_bmi160.c" debugPath="../../../ble_bmi160.c" selected="0" top="42" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="55" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../ble_bmi160.h" debugPath="../../../ble_bmi160.h" selected="0" top="42" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="390" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/uart/nrf_drv_uart.c" debugPath="../../../../../../components/drivers_nrf/uart/nrf_drv_uart.c" selected="0" top="378" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="401" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/saadc/nrf_drv_saadc.c" debugPath="../../../../../../components/drivers_nrf/saadc/nrf_drv_saadc.c" selected="0" top="376" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="239" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/saadc/nrf_drv_saadc.h" debugPath="../../../../../../components/drivers_nrf/saadc/nrf_drv_saadc.h" selected="0" top="228" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="42" y="1510" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../main.c" selected="0" top="1495" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="9" useTextEdit="1" useBinaryEdit="0" left="0" path="ble_app_proximity_pca10040_s132.emProject" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="24" y="1648" useTextEdit="1" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="1" top="1627" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="57" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../ble_bmi160.c" selected="0" top="42" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="55" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../ble_bmi160.h" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="390" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/uart/nrf_drv_uart.c" selected="0" top="378" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="401" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/saadc/nrf_drv_saadc.c" selected="0" top="376" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="16" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/saadc/nrf_drv_saadc.h" selected="0" top="11" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="68" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/boards.c" selected="0" top="63" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="142" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/boards/pca10040.h" selected="0" top="125" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="668" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/hal/nrf_gpio.h" selected="0" top="664" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/drivers_nrf/gpiote/nrf_drv_gpiote.c" selected="0" top="81" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="101" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/timer/app_timer.h" selected="0" top="84" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/timer/app_timer.c" selected="0" top="156" codecName="Default"/>
  </Files>
- <ARMCrossStudioWindow activeProject="ble_app_proximity_pca10040_s132" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Debug" debugSearchFileMap="" fileDialogInitialDirectory="/Users/vitaliy/work/nRF52/nRF5_SDK_14.2.0_17b948a/examples/ble_peripheral/ble_app_proximity" debugSearchPath="" autoConnectCapabilities="3711"/>
+ <ARMCrossStudioWindow activeProject="ble_app_proximity_pca10040_s132" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="/home/anatolii/BLE/nRF5_SDK_14.2.0_17b948a/components/toolchain/ses/ses_nRF_Startup.s&#xa;&#xa;/home/anatolii/BLE/nRF5_SDK_14.2.0_17b948a/components/toolchain/ses/ses_nrf52_Vectors.s&#xa;" fileDialogInitialDirectory="/Users/vitaliy/work/nRF52/nRF5_SDK_14.2.0_17b948a/examples/ble_peripheral/ble_app_proximity" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>
