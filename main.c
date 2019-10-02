@@ -169,7 +169,9 @@ BLE_ADVERTISING_DEF(m_advertising);                     /**< Advertising module 
 BLE_DB_DISCOVERY_DEF(m_ble_db_discovery);               /**< DB discovery module instance. */
 
 const nrf_drv_timer_t TIMER_MOTORS = NRF_DRV_TIMER_INSTANCE(4);
-uint8_t motor_control_cycle_status  = 0;
+volatile uint8_t motor_control_cycle_status     = 0;
+volatile uint8_t motor_control_cycle_prescaler_counter  = 0;
+volatile uint8_t motor_control_cycle_prescaler          = 1;
 volatile int16_t needed_steps_horizontal    = 0;
 volatile int16_t needed_steps_vertical      = 0;
 
@@ -202,15 +204,15 @@ volatile int32_t ina219_currentDivider_mA = 10;
 volatile int16_t ina219_current = 0;
 volatile int16_t ina219_voltage = 0;
 
-void motor_step_horizontal(void) {
-    uint32_t horizontal_read = nrf_gpio_pin_out_read(HORIZONTAL_STEP_PIN);
-
-    if (horizontal_read != 0) {
-      nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 0);
-    } else {
-      nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 1);
-    }
-}
+//void motor_step_horizontal(void) {
+//    uint32_t horizontal_read = nrf_gpio_pin_out_read(HORIZONTAL_STEP_PIN);
+//
+//    if (horizontal_read != 0) {
+//      nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 0);
+//    } else {
+//      nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 1);
+//    }
+//}
 
 void motor_set_dir_horizontal(uint8_t direction) {
     if (direction != 0) {
@@ -220,14 +222,14 @@ void motor_set_dir_horizontal(uint8_t direction) {
     }
 }
 
-void motor_step_vertical(void) {
-    uint32_t vert_read = nrf_gpio_pin_out_read(VERTICAL_STEP_PIN);
-    if (vert_read != 0) {
-      nrf_gpio_pin_write(VERTICAL_STEP_PIN, 0);
-    } else {
-      nrf_gpio_pin_write(VERTICAL_STEP_PIN, 1);
-    }
-}
+//void motor_step_vertical(void) {
+//    uint32_t vert_read = nrf_gpio_pin_out_read(VERTICAL_STEP_PIN);
+//    if (vert_read != 0) {
+//      nrf_gpio_pin_write(VERTICAL_STEP_PIN, 0);
+//    } else {
+//      nrf_gpio_pin_write(VERTICAL_STEP_PIN, 1);
+//    }
+//}
 
 void motor_set_dir_vertical(uint8_t direction) {
     if (direction != 0) {
@@ -238,39 +240,53 @@ void motor_set_dir_vertical(uint8_t direction) {
 }
 
 void mottor_stepping_function (void) 
-{
-    if (motor_control_cycle_status == 0) {
-      motor_control_cycle_status = 1;
-      
-      if (needed_steps_horizontal > 0) {
-        needed_steps_horizontal--;
-        motor_set_dir_horizontal(0);
-        motor_set_dir_vertical(0);
-        motor_step_horizontal();
-        motor_step_vertical();
-      } else if (needed_steps_horizontal < 0) {
-        needed_steps_horizontal++;
-        motor_set_dir_horizontal(1);
-        motor_set_dir_vertical(1);
-        motor_step_horizontal();
-        motor_step_vertical();
+{   
+    motor_control_cycle_prescaler_counter++;
+    if (motor_control_cycle_prescaler_counter >= motor_control_cycle_prescaler) {
+      motor_control_cycle_prescaler_counter = 0;
+
+
+      motor_control_cycle_status++;
+      if (motor_control_cycle_status >= 4) {
+        motor_control_cycle_status = 0;
       }
-    } else {
-      motor_control_cycle_status = 0;
-      
-      if (needed_steps_vertical > 0) {
-        needed_steps_vertical--;
-        motor_set_dir_vertical(0);
-        motor_step_vertical();
-      } else if (needed_steps_vertical < 0) {
-        needed_steps_vertical++;
-        motor_set_dir_vertical(1);
-        motor_step_vertical();
+
+      if (motor_control_cycle_status == 0) {     
+        if (needed_steps_horizontal > 0) {
+          needed_steps_horizontal--;
+          motor_set_dir_horizontal(0);
+          motor_set_dir_vertical(0);
+          nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 1);
+          nrf_gpio_pin_write(VERTICAL_STEP_PIN, 1);
+        } else if (needed_steps_horizontal < 0) {
+          needed_steps_horizontal++;
+          motor_set_dir_horizontal(1);
+          motor_set_dir_vertical(1);
+          nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 1);
+          nrf_gpio_pin_write(VERTICAL_STEP_PIN, 1);
+        }
+ 
+      } else if (motor_control_cycle_status == 1) {
+          nrf_gpio_pin_write(HORIZONTAL_STEP_PIN, 0);
+          nrf_gpio_pin_write(VERTICAL_STEP_PIN, 0);
+
+      } else if (motor_control_cycle_status == 2) {
+        if (needed_steps_vertical > 0) {
+          needed_steps_vertical--;
+          motor_set_dir_vertical(0);
+          nrf_gpio_pin_write(VERTICAL_STEP_PIN, 1);
+        } else if (needed_steps_vertical < 0) {
+          needed_steps_vertical++;
+          motor_set_dir_vertical(1);
+          nrf_gpio_pin_write(VERTICAL_STEP_PIN, 1);
+        }
+ 
+      } else if (motor_control_cycle_status == 3) {
+          nrf_gpio_pin_write(VERTICAL_STEP_PIN, 0);
       }
     }
 
 //    NRF_LOG_INFO("000000000000000");
-
 }
 
 /**
@@ -1514,7 +1530,7 @@ int main(void)
 
         
         /* timer initilization for motors control */
-        uint32_t time_us = 50; //Time(in miliseconds) between consecutive compare events.
+        uint32_t time_us = 40; //Time(in miliseconds) between consecutive compare events.
         uint32_t time_ticks;
 
         //Configure TIMER_MOTORS for generating simple light effect - leds on board will invert his state one after the other.
