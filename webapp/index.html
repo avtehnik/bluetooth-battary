@@ -11,34 +11,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
 <body>
-<button>Get Bluetooth Device's Battery Level</button>
-
-
+<button onclick="connect()">Connect</button>
 <h3>Live Output</h3>
+<button onclick="getBatteryLevel()">Get Bluetooth Device's Battery Level</button>
+
+<div class="slidecontainer">
+<!--    <input type="range" min="-1000" max="1000" value="0" class="slider" id="myRange">-->
+<!--    <span id="demo"></span>-->
+<!--    <span id="buffer"></span>-->
+
+    <input type="number" min="-20000" max="20000" value="1000" id="steps_horizontal">
+    <input type="number" min="-5400" max="5400" value="0" id="steps_vertical">
+    <input type="number" min="1" max="255"  value="0" id="prescaler">
+    <input type="number" min="1" max="255" value="0" id="flags">
+    <button id="send">submit</button>
+</div>
+
 <div id="output" class="output">
     <div id="content"></div>
     <div id="status"></div>
     <pre id="log"></pre>
 </div>
 <script>
+    var send = document.getElementById("send");
+    var batteryCharacteristic;
+    var movementCharacteristic;
+
     var ChromeSamples = {
-        log: function() {
-            var line = Array.prototype.slice.call(arguments).map(function(argument) {
+        log: function () {
+            var line = Array.prototype.slice.call(arguments).map(function (argument) {
                 return typeof argument === 'string' ? argument : JSON.stringify(argument);
             }).join(' ');
 
             document.querySelector('#log').textContent += line + '\n';
         },
 
-        clearLog: function() {
+        clearLog: function () {
             document.querySelector('#log').textContent = '';
         },
 
-        setStatus: function(status) {
+        setStatus: function (status) {
             document.querySelector('#status').textContent = status;
         },
 
-        setContent: function(newContent) {
+        setContent: function (newContent) {
             var content = document.querySelector('#content');
             while (content.hasChildNodes()) {
                 content.removeChild(content.lastChild);
@@ -46,52 +62,7 @@
             content.appendChild(newContent);
         }
     };
-</script>
-<script>
-    document.querySelector('button').addEventListener('click', function() {
-        if (isWebBluetoothEnabled()) {
-            ChromeSamples.clearLog();
-            onButtonClick();
-        }
-    });
-</script>
 
-<script>function onButtonClick() {
-    log('Requesting Bluetooth Device...');
-
-
-    navigator.bluetooth.requestDevice({
-        filters: [
-            {services: ['battery_service']}
-        ]
-    })
-        .then(device => {
-            log('Connecting to GATT Server...');
-            return device.gatt.connect();
-        })
-        .then(server => {
-            log('Getting Battery Service...');
-            return server.getPrimaryService('battery_service');
-        })
-        .then(service => {
-            log('Getting Battery Level Characteristic...');
-            return service.getCharacteristic('battery_level');
-        })
-        .then(characteristic => {
-            log('Reading Battery Level...');
-            return characteristic.readValue();
-        })
-        .then(value => {
-            let batteryLevel = value.getUint8(0);
-            log('> Battery Level is ' + batteryLevel + '%');
-        })
-        .catch(error => {
-            log('Argh! ' + error);
-        });
-}
-</script>
-
-<script>
     log = ChromeSamples.log;
 
     function isWebBluetoothEnabled() {
@@ -102,6 +73,81 @@
                 'Please make sure the "Experimental Web Platform features" flag is enabled.');
             return false;
         }
+    }
+
+    function connect() {
+        if (isWebBluetoothEnabled()) {
+            ChromeSamples.clearLog();
+        }
+
+        batteryCharacteristic = null;
+        movementCharacteristic = null;
+        log('Requesting any Bluetooth Device...');
+        navigator.bluetooth.requestDevice({
+            filters: [
+                {services: ['battery_service']}
+            ],
+            optionalServices: ['6b944144-075d-d89a-e611-6cad4adddddd']
+        }).then(device => {
+            log('Connecting to GATT Server...');
+            return device.gatt.connect();
+        }).then(server => {
+            log('Getting Battery Service...');
+            server.getPrimaryService('battery_service').then(
+                service => {
+                    log('Getting Battery Level Characteristic...');
+                    batteryCharacteristic = service.getCharacteristic('battery_level');
+                    return service.getCharacteristic('battery_level');
+                }
+            ).catch(error => {
+                log('Argh! ' + error);
+            });
+
+            server.getPrimaryService('6b944144-075d-d89a-e611-6cad4adddddd').then(service => {
+                log('Getting Movement Characteristic...');
+                return service.getCharacteristic('6b944146-075d-d89a-e611-6cad4adddddd');
+            }).then(characteristic => {
+                movementCharacteristic = characteristic;
+            }).catch(error => {
+                log('Argh! ' + error);
+            });
+        }).catch(error => {
+            log('Argh! ' + error);
+        });
+    }
+
+    send.onclick = function (e) {
+        ChromeSamples.clearLog();
+        log('Sending Movement Device...');
+        e.preventDefault();
+        const steps_horizontal = document.getElementById("steps_horizontal");
+        const steps_vertical = document.getElementById("steps_vertical");
+        const prescaler = document.getElementById("prescaler");
+        const flags = document.getElementById("flags");
+
+        const buffer = new Uint8Array([
+            steps_horizontal.value, steps_horizontal.value >> 8,
+            steps_vertical.value, steps_vertical.value >> 8,
+            prescaler.value,
+            flags.value
+        ]);
+        movementCharacteristic.writeValue(buffer).catch(error => {
+            log('Argh! ' + error);
+        });
+    };
+
+    function getBatteryLevel() {
+        log('Requesting Bluetooth Device...');
+
+        batteryCharacteristic.then(characteristic => {
+            log('Reading Battery Level...');
+            return characteristic.readValue();
+        }).then(value => {
+            log('> Battery Level is ' + value.getUint8(0) + '%');
+        })
+        .catch(error => {
+            log('Argh! ' + error);
+        });
     }
 </script>
 </body>
